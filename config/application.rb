@@ -16,6 +16,9 @@ module KudosPlane
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[assets tasks])
 
+    # Collapse app/agents/tools so tool classes are top-level constants, not Tools::ClassName
+    Rails.autoloaders.main.collapse("#{root}/app/agents/tools")
+
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files

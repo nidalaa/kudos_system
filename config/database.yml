@@ -21,7 +21,7 @@ production:
     database_tasks: false
   queue:
     <<: *production_primary
-    database_tasks: false
+    database_tasks: true
   cable:
     <<: *production_primary
     database_tasks: false

@@ -22,3 +22,6 @@
 .env
 .env.*
 !.env.example
+
+# Ignore brainstorm scratch files
+/.superpowers/

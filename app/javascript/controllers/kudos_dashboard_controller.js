@@ -155,7 +155,7 @@ export default class extends Controller {
     })
     .then(response => {
       if (response.ok) {
-        alert("Processing started — reload the page in a few seconds to see results.")
+        alert("Messages will be processed in the background. Records will appear one by one, so you might need to refresh the page in a couple of minutes (depending on the file size).")
       } else {
         alert("Upload failed — server returned " + response.status)
       }

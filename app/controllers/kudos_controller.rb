@@ -9,6 +9,7 @@ class KudosController < ApplicationController
         category:        k.category,
         reason:          k.reason,
         reactions_count: Array(k.reactions_from).size,
+        slack_message_id: k.slack_message_id,
         channel:         k.slack_channel,
         date:            k.created_at.strftime("%b %d, %Y"),
         status:          k.status == "pending_review" ? "pending" : k.status

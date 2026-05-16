@@ -62,6 +62,16 @@
               data: { turbo_confirm: "Delete all kudos? This cannot be undone." },
               class: "inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-red-700 bg-white border border-red-300 rounded-md hover:bg-red-50 transition-colors" %>
 
+        <select
+          data-action="change->kudos-dashboard#filterCategory"
+          data-kudos-dashboard-target="categoryFilter"
+          class="px-3 py-2 text-sm border border-gray-300 rounded-md bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+          <option value="">All categories</option>
+          <% @categories.each do |cat| %>
+            <option value="<%= cat.name %>"><%= cat.name %></option>
+          <% end %>
+        </select>
+
         <input
           type="search"
           placeholder="Search kudos…"
@@ -129,6 +139,7 @@
                 data-action="change->kudos-dashboard#toggleAll"
                 class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
             </th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Msg ID</th>
             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Giver</th>
             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Receiver</th>
             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
@@ -144,6 +155,7 @@
               data-kudos-dashboard-target="row"
               data-status="<%= kudos[:status] %>"
               data-id="<%= kudos[:id] %>"
+              data-category="<%= kudos[:category] %>"
               class="hover:bg-gray-50 transition-colors">
               <td class="px-4 py-3">
                 <input
@@ -152,6 +164,7 @@
                   data-action="change->kudos-dashboard#toggleRow"
                   class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
               </td>
+              <td class="px-4 py-3 text-xs text-gray-400 whitespace-nowrap font-mono"><%= kudos[:slack_message_id] %></td>
               <td class="px-4 py-3 text-sm font-medium text-gray-900 whitespace-nowrap"><%= kudos[:giver] %></td>
               <td class="px-4 py-3 text-sm text-gray-700 whitespace-nowrap"><%= kudos[:receiver] %></td>
               <td class="px-4 py-3 text-sm whitespace-nowrap">

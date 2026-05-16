@@ -4,11 +4,13 @@ export default class extends Controller {
   static targets = [
     "row", "tabButton", "pendingCount", "approvedCount", "rejectedCount",
     "emptyState", "fileInput", "tbody",
-    "checkbox", "selectAll", "bulkBar", "selectedCount", "bulkCategoryInput"
+    "checkbox", "selectAll", "bulkBar", "selectedCount", "bulkCategoryInput",
+    "categoryFilter"
   ]
   static values = {
     tab:        { type: String, default: "pending" },
     search:     { type: String, default: "" },
+    category:   { type: String, default: "" },
     categories: { type: Array,  default: [] }
   }
 
@@ -43,6 +45,13 @@ export default class extends Controller {
 
   search(event) {
     this.searchValue = event.currentTarget.value.toLowerCase()
+    this.updateView()
+  }
+
+  // ── Category filter ──────────────────────────────────────────────────────────
+
+  filterCategory(event) {
+    this.categoryValue = event.currentTarget.value
     this.updateView()
   }
 
@@ -129,18 +138,30 @@ export default class extends Controller {
   handleFile(event) {
     const file = event.currentTarget.files[0]
     if (!file) return
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      try {
-        const data  = JSON.parse(e.target.result)
-        const items = Array.isArray(data) ? data : [data]
-        items.forEach(item => this.#addRow(item))
-        this.updateView()
-      } catch {
-        alert("Could not parse file — expected a JSON array of kudos objects.")
-      }
+
+    if (!confirm(`Send "${file.name}" to the AI agent for processing?`)) {
+      event.currentTarget.value = ""
+      return
     }
-    reader.readAsText(file)
+
+    const formData = new FormData()
+    formData.append("file", file)
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content
+
+    fetch("/uploads/slack", {
+      method: "POST",
+      body: formData,
+      headers: { "X-CSRF-Token": csrf }
+    })
+    .then(response => {
+      if (response.ok) {
+        alert("Processing started — reload the page in a few seconds to see results.")
+      } else {
+        alert("Upload failed — server returned " + response.status)
+      }
+    })
+    .catch(() => alert("Upload failed — network error."))
+
     event.currentTarget.value = ""
   }
 
@@ -156,9 +177,10 @@ export default class extends Controller {
       const status = row.dataset.status
       counts[status] = (counts[status] || 0) + 1
 
-      const matchesTab    = status === tab
-      const matchesSearch = !query || row.textContent.toLowerCase().includes(query)
-      const show          = matchesTab && matchesSearch
+      const matchesTab      = status === tab
+      const matchesSearch   = !query || row.textContent.toLowerCase().includes(query)
+      const matchesCategory = !this.categoryValue || row.dataset.category === this.categoryValue
+      const show            = matchesTab && matchesSearch && matchesCategory
 
       row.style.display = show ? "" : "none"
       if (show) visible++
@@ -214,7 +236,8 @@ export default class extends Controller {
   #addRow(item) {
     const row      = document.createElement("tr")
     row.dataset.kudosDashboardTarget = "row"
-    row.dataset.status = item.status || "pending"
+    row.dataset.status   = item.status   || "pending"
+    row.dataset.category = item.category || ""
     row.className  = "hover:bg-gray-50 transition-colors"
 
     const category       = this.#esc(item.category || "Uncategorised")
@@ -273,9 +296,9 @@ export default class extends Controller {
       rejectBtn.className  = "reject-btn inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors bg-red-50 text-red-700 hover:bg-red-100 border border-red-200"
     } else if (status === "approved") {
       approveBtn.className = "approve-btn inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors bg-green-100 text-green-800 border border-green-300 cursor-default"
-      rejectBtn.className  = "reject-btn inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors bg-gray-50 text-gray-400 border border-gray-200 hover:bg-red-50 hover:text-red-700 hover:border-red-200"
+      rejectBtn.className  = "reject-btn inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors bg-red-50 text-red-700 hover:bg-red-100 border border-red-200"
     } else {
-      approveBtn.className = "approve-btn inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors bg-gray-50 text-gray-400 border border-gray-200 hover:bg-green-50 hover:text-green-700 hover:border-green-200"
+      approveBtn.className = "approve-btn inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors bg-green-50 text-green-700 hover:bg-green-100 border border-green-200"
       rejectBtn.className  = "reject-btn inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md transition-colors bg-red-100 text-red-800 border border-red-300 cursor-default"
     }
   }

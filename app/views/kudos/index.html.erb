@@ -58,7 +58,7 @@
           Upload JSON
         </button>
 
-        <%= button_to "Delete all", "/kudos/all", method: :delete,
+        <%= button_to "Delete all", kudos_review_all_path, method: :delete,
               data: { turbo_confirm: "Delete all kudos? This cannot be undone." },
               class: "inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-red-700 bg-white border border-red-300 rounded-md hover:bg-red-50 transition-colors" %>
 

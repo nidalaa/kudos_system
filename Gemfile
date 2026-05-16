@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem "rails", "~> 8.0.2"
+gem "rails", "~> 8.1.3"
 gem "anthropic", "~> 1.41"
 gem "mission_control-jobs"
 gem "dotenv-rails", groups: [:development, :test]

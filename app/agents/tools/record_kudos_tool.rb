@@ -6,7 +6,7 @@ class RecordKudosTool
   def definition
     {
       name: name,
-      description: "Record a kudos extracted from a Slack message. Call find_or_create_employee first to get giver_id and receiver_id.",
+      description: "Record a kudos extracted from a Slack message. Call find_or_create_employee first to get giver_id and receiver_id, and find_or_create_category to get the category name.",
       input_schema: {
         type: "object",
         properties: {

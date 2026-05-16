@@ -6,6 +6,7 @@ class KudosAgent
     @client = Anthropic::Client.new
     @tools  = [
       FindOrCreateEmployeeTool.new,
+      FindOrCreateCategoryTool.new,
       RecordKudosTool.new
     ]
   end

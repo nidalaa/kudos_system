@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_16_132823) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_16_143456) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -46,7 +46,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_16_132823) do
     t.datetime "updated_at", null: false
     t.index ["giver_id"], name: "index_kudos_on_giver_id"
     t.index ["receiver_id"], name: "index_kudos_on_receiver_id"
-    t.index ["slack_message_id"], name: "index_kudos_on_slack_message_id", unique: true
+    t.index ["slack_message_id", "receiver_id"], name: "index_kudos_on_message_and_receiver", unique: true
     t.index ["status"], name: "index_kudos_on_status"
   end
 

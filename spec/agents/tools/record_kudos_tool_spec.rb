@@ -50,13 +50,24 @@ RSpec.describe RecordKudosTool do
       end
     end
 
-    context "with a duplicate slack_message_id" do
+    context "with the same slack_message_id and same receiver" do
       before { tool.call(valid_input) }
 
       it "does not create a duplicate and returns created: false" do
         result = tool.call(valid_input)
         expect(result[:created]).to be false
         expect(Kudos.count).to eq(1)
+      end
+    end
+
+    context "with the same slack_message_id but a different receiver" do
+      let(:other_receiver) { create(:employee, username: "bob.jones") }
+
+      it "creates a second kudos and returns created: true" do
+        tool.call(valid_input)
+        result = tool.call(valid_input.merge("receiver_id" => other_receiver.id))
+        expect(result[:created]).to be true
+        expect(Kudos.count).to eq(2)
       end
     end
   end

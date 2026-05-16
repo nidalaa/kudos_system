@@ -7,11 +7,17 @@ RSpec.describe Kudos, type: :model do
   it { is_expected.to belong_to(:receiver).class_name("Employee") }
   it { is_expected.to validate_presence_of(:slack_message_id) }
 
-  it "rejects duplicate slack_message_id" do
-    create(:kudos, slack_message_id: "msg_001")
-    dup = build(:kudos, slack_message_id: "msg_001")
+  it "rejects same slack_message_id for the same receiver" do
+    existing = create(:kudos, slack_message_id: "msg_001")
+    dup = build(:kudos, slack_message_id: "msg_001", receiver: existing.receiver)
     expect(dup).not_to be_valid
     expect(dup.errors[:slack_message_id]).to include("has already been taken")
+  end
+
+  it "allows same slack_message_id for a different receiver" do
+    create(:kudos, slack_message_id: "msg_001")
+    other = build(:kudos, slack_message_id: "msg_001")
+    expect(other).to be_valid
   end
 
   it "rejects invalid status" do

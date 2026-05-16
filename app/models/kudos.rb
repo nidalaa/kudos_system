@@ -4,7 +4,7 @@ class Kudos < ApplicationRecord
 
   STATUSES = %w[pending_review approved rejected].freeze
 
-  validates :slack_message_id, presence: true, uniqueness: true
+  validates :slack_message_id, presence: true, uniqueness: { scope: :receiver_id }
   validates :status, inclusion: { in: STATUSES }
 
   before_validation :set_default_status, if: -> { status.nil? }

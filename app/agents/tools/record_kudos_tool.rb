@@ -26,7 +26,7 @@ class RecordKudosTool
   end
 
   def call(input)
-    kudos = Kudos.find_or_create_by(slack_message_id: input["slack_message_id"]) do |k|
+    kudos = Kudos.find_or_create_by(slack_message_id: input["slack_message_id"], receiver_id: input["receiver_id"]) do |k|
       k.giver_id         = input["giver_id"]
       k.receiver_id      = input["receiver_id"]
       k.reason           = input["reason"]

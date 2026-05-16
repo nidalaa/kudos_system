@@ -106,7 +106,7 @@ Saves the kudos record. Required fields:
 | `reason` | 1–2 sentence summary of why the kudos is given |
 | `category` | One of the six categories above |
 | `original_message` | The full raw message text |
-| `reactions_from` | Array of usernames who reacted with taco (endorsers, not givers) |
+| `reactions_from` | Array of all reactions as `"emoji:username"` strings, e.g. `["taco:james.wilson", "heart:tom.chen"]` |
 | `slack_message_id` | The message `id` field — used for deduplication |
 | `slack_channel` | The `channel` field |
 | `slack_timestamp` | The `timestamp` field |
@@ -146,6 +146,5 @@ Saves the kudos record. Required fields:
 ```
 
 - `author` → giver (message author is always the kudos giver)
-- `reactions[emoji=taco].user` → endorsers, stored in `reactions_from`
-- Only taco emoji reactions are stored. Other reactions are ignored.
+- `reactions` → pass all reactions as `"emoji:username"` strings in `reactions_from`, e.g. `["taco:james.wilson", "heart:tom.chen"]`
 - A batch is an array of these message objects.

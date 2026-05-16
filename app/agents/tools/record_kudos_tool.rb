@@ -15,7 +15,7 @@ class RecordKudosTool
           reason:           { type: "string",  description: "Why the kudos is being given" },
           category:         { type: "string",  description: "Category label, e.g. 'Teamwork', 'Technical Excellence'" },
           original_message: { type: "string",  description: "The raw Slack message text" },
-          reactions_from:   { type: "array", items: { type: "string" }, description: "Usernames of taco reactors" },
+          reactions_from:   { type: "array", items: { type: "string" }, description: "All reactions in 'emoji:username' format, e.g. ['taco:james.wilson', 'heart:tom.chen']" },
           slack_message_id: { type: "string",  description: "Unique Slack message ID for deduplication" },
           slack_channel:    { type: "string",  description: "Slack channel name, e.g. '#engineering'" },
           slack_timestamp:  { type: "string",  description: "ISO8601 timestamp of the original message" }

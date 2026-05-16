@@ -77,6 +77,18 @@ export default class extends Controller {
     select.classList.add("hidden")
     display.classList.remove("hidden")
     editBtn?.classList.remove("hidden")
+
+    const row  = select.closest("[data-id]")
+    const id   = row?.dataset.id
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content
+    if (id && newVal) {
+      row.dataset.category = newVal
+      fetch(`/kudos/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", "X-CSRF-Token": csrf },
+        body: JSON.stringify({ category: newVal })
+      })
+    }
   }
 
   // ── Bulk selection ───────────────────────────────────────────────────────────
@@ -209,7 +221,7 @@ export default class extends Controller {
     this.updateView()
     const id   = row.dataset.id
     const csrf = document.querySelector('meta[name="csrf-token"]')?.content
-    fetch(`/kudos/${id}/status`, {
+    fetch(`/kudos/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json", "X-CSRF-Token": csrf },
       body: JSON.stringify({ status })

@@ -17,9 +17,9 @@ class KudosController < ApplicationController
     end
   end
 
-  def update_status
+  def update
     kudos = Kudos.find(params[:id])
-    kudos.update!(status: params[:status])
+    kudos.update!(params.permit(:status, :category))
     head :ok
   end
 

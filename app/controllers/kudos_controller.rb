@@ -17,6 +17,12 @@ class KudosController < ApplicationController
     end
   end
 
+  def update_status
+    kudos = Kudos.find(params[:id])
+    kudos.update!(status: params[:status])
+    head :ok
+  end
+
   def destroy_all
     Kudos.delete_all
     redirect_to kudos_review_path

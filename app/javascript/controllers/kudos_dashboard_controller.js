@@ -32,13 +32,11 @@ export default class extends Controller {
   // ── Per-row approve / reject ─────────────────────────────────────────────────
 
   approve(event) {
-    event.currentTarget.closest("[data-status]").dataset.status = "approved"
-    this.updateView()
+    this.#setStatus(event.currentTarget.closest("[data-status]"), "approved")
   }
 
   reject(event) {
-    event.currentTarget.closest("[data-status]").dataset.status = "rejected"
-    this.updateView()
+    this.#setStatus(event.currentTarget.closest("[data-status]"), "rejected")
   }
 
   // ── Search ───────────────────────────────────────────────────────────────────
@@ -105,15 +103,13 @@ export default class extends Controller {
   // ── Bulk actions ─────────────────────────────────────────────────────────────
 
   bulkApprove() {
-    this.#selectedRows().forEach(row => { row.dataset.status = "approved" })
+    this.#selectedRows().forEach(row => this.#setStatus(row, "approved"))
     this.clearSelection()
-    this.updateView()
   }
 
   bulkReject() {
-    this.#selectedRows().forEach(row => { row.dataset.status = "rejected" })
+    this.#selectedRows().forEach(row => this.#setStatus(row, "rejected"))
     this.clearSelection()
-    this.updateView()
   }
 
   bulkSetCategory() {
@@ -207,6 +203,18 @@ export default class extends Controller {
   }
 
   // ── Private ──────────────────────────────────────────────────────────────────
+
+  #setStatus(row, status) {
+    row.dataset.status = status
+    this.updateView()
+    const id   = row.dataset.id
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content
+    fetch(`/kudos/${id}/status`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", "X-CSRF-Token": csrf },
+      body: JSON.stringify({ status })
+    })
+  }
 
   #visibleCheckboxes() {
     return this.checkboxTargets.filter(cb =>

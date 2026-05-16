@@ -13,5 +13,15 @@ test:
   database: kudos_plane_test
 
 production:
-  <<: *default
-  url: <%= ENV["DATABASE_URL"] %>
+  primary: &production_primary
+    <<: *default
+    url: <%= ENV["DATABASE_URL"] %>
+  cache:
+    <<: *production_primary
+    database_tasks: false
+  queue:
+    <<: *production_primary
+    database_tasks: false
+  cable:
+    <<: *production_primary
+    database_tasks: false

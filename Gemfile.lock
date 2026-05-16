@@ -414,7 +414,7 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
-  anthropic
+  anthropic (~> 1.41)
   bootsnap
   brakeman
   capybara

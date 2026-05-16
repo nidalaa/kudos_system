@@ -15,4 +15,9 @@ class KudosController < ApplicationController
       }
     end
   end
+
+  def destroy_all
+    Kudos.delete_all
+    redirect_to kudos_path
+  end
 end

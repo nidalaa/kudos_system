@@ -8,6 +8,7 @@ class KudosController < ApplicationController
         receiver:        "#{k.receiver.first_name} #{k.receiver.last_name}",
         category:        k.category,
         reason:          k.reason,
+        reactions_from:  Array(k.reactions_from),
         reactions_count: Array(k.reactions_from).size,
         slack_message_id: k.slack_message_id,
         channel:         k.slack_channel,

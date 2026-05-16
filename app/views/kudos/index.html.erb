@@ -193,7 +193,16 @@
                 <span class="line-clamp-2" title="<%= kudos[:reason] %>"><%= kudos[:reason] %></span>
               </td>
               <td class="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
-                <span class="font-medium text-gray-700"><%= kudos[:reactions_count] %></span>
+                <div class="relative group inline-block">
+                  <span class="font-medium text-gray-700 cursor-default"><%= kudos[:reactions_count] %></span>
+                  <% if kudos[:reactions_from].any? %>
+                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1.5 z-10 min-w-max space-y-0.5">
+                      <% kudos[:reactions_from].each do |r| %>
+                        <div><%= format_reaction(r) %></div>
+                      <% end %>
+                    </div>
+                  <% end %>
+                </div>
               </td>
               <td class="px-4 py-3 text-sm text-gray-500 whitespace-nowrap"><%= kudos[:date] %></td>
               <td class="px-4 py-3 whitespace-nowrap">

@@ -260,8 +260,12 @@ export default class extends Controller {
     row.dataset.category = item.category || ""
     row.className  = "hover:bg-gray-50 transition-colors"
 
-    const category       = this.#esc(item.category || "Uncategorised")
-    const reactionsCount = item.reactions_count ?? item.reactions?.length ?? 0
+    const category        = this.#esc(item.category || "Uncategorised")
+    const reactionsFrom   = item.reactions_from ?? item.reactions ?? []
+    const reactionsCount  = item.reactions_count ?? reactionsFrom.length ?? 0
+    const reactionsTooltip = reactionsFrom.length
+      ? `<div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1.5 z-10 min-w-max space-y-0.5">${reactionsFrom.map(r => `<div>${this.#esc(this.#formatReaction(String(r)))}</div>`).join("")}</div>`
+      : ""
 
     row.innerHTML = `
       <td class="px-4 py-3">
@@ -291,7 +295,10 @@ export default class extends Controller {
         <span class="line-clamp-2" title="${this.#esc(item.reason || "")}">${this.#esc(item.reason || "")}</span>
       </td>
       <td class="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
-        <span class="font-medium text-gray-700">${reactionsCount}</span>
+        <div class="relative group inline-block">
+          <span class="font-medium text-gray-700 cursor-default">${reactionsCount}</span>
+          ${reactionsTooltip}
+        </div>
       </td>
       <td class="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">${this.#esc(item.date || "")}</td>
       <td class="px-4 py-3 whitespace-nowrap">
@@ -327,6 +334,20 @@ export default class extends Controller {
     return this.categoriesValue
       .map(c => `<option value="${this.#esc(c.name)}" title="${this.#esc(c.description)}" ${c.name === selected ? "selected" : ""}>${this.#esc(c.name)}</option>`)
       .join("")
+  }
+
+  #formatReaction(r) {
+    const emojiMap = {
+      taco: "🌮", heart: "❤️", thumbsup: "👍", fire: "🔥", clap: "👏",
+      "100": "💯", star: "⭐", tada: "🎉", rocket: "🚀", mind_blown: "🤯",
+      raised_hands: "🙌", muscle: "💪", pray: "🙏", moneybag: "💰",
+      chart_with_upwards_trend: "📈", fist_bump: "👊", accessibility: "♿", books: "📚"
+    }
+    if (r.includes(":")) {
+      const [emoji, username] = r.split(":", 2)
+      return `${emojiMap[emoji] || `:${emoji}:`} ${username}`
+    }
+    return r
   }
 
   #esc(str) {

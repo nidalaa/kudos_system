@@ -41,13 +41,7 @@ class KudosAgent
   private
 
   def system_prompt
-    ENV.fetch("KUDOS_SYSTEM_PROMPT",
-      "You are a kudos extraction agent. Given a batch of Slack messages, " \
-      "identify messages where one person praises or thanks another person. " \
-      "For each kudos found: first call find_or_create_employee for the giver and receiver, " \
-      "then call record_kudos with their IDs. " \
-      "If a message contains no kudos, skip it. Do not invent kudos."
-    )
+    File.read(Rails.root.join("docs/kudos_agent_prompt.md"))
   end
 
   def tool_definitions

@@ -57,7 +57,7 @@ Classify each kudos into exactly one:
 
 **Tie-breaking:** If two categories apply, pick the one most directly supported by the specific words in the message.
 
-**Default:** If no category fits clearly, use **Teamwork**.
+**Default:** If no category fits clearly, use **Ambiguous**. Do not force a category — check all six first. Example: a work anniversary praising sustained technical contributions → **Technical Excellence**, not Ambiguous.
 
 **Extra category**: Ambigious, to let operator know that there are some doubts.
 

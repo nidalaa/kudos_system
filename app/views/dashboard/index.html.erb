@@ -1,0 +1,252 @@
+<div
+  data-controller="kudos-analytics"
+  data-kudos-analytics-top-receivers-value="<%= @top_receivers.to_json %>"
+  data-kudos-analytics-top-givers-value="<%= @top_givers.to_json %>"
+  data-kudos-analytics-by-category-value="<%= @by_category.to_json %>"
+  data-kudos-analytics-weekly-trend-value="<%= @weekly_trend.to_json %>"
+  data-kudos-analytics-most-backed-value="<%= @most_backed.to_json %>"
+  data-kudos-analytics-category-colors-value="<%= @category_colors.to_json %>"
+  class="min-h-screen bg-slate-950 text-slate-200">
+
+  <%# ── Nav ──────────────────────────────────────────────────────────────── %>
+  <header class="border-b border-slate-800 px-6 py-3">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <span class="text-indigo-400 font-bold text-base tracking-tight">Kudos Analytics</span>
+
+      <%# Period picker %>
+      <div class="flex items-center gap-1 bg-slate-900 rounded-lg p-1 text-xs font-medium">
+        <% [["week","Last week"],["2weeks","Last 2w"],["month","Last month"],["quarter","Quarter"],["year","Year"]].each do |val, label| %>
+          <%= link_to label, root_path(period: val),
+                class: "px-3 py-1.5 rounded-md transition-colors #{@period == val ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-200'}" %>
+        <% end %>
+        <% if @period == "custom" %>
+          <span class="px-3 py-1.5 rounded-md bg-indigo-600 text-white">Custom</span>
+        <% else %>
+          <button
+            onclick="document.getElementById('custom-range').classList.toggle('hidden')"
+            class="px-3 py-1.5 rounded-md text-slate-400 hover:text-slate-200 transition-colors">
+            Custom…
+          </button>
+        <% end %>
+      </div>
+
+      <%# Custom date range form %>
+      <form id="custom-range" method="get" action="<%= root_path %>" class="<%= @period == 'custom' ? '' : 'hidden' %> flex items-center gap-2 text-xs">
+        <input type="hidden" name="period" value="custom">
+        <input type="date" name="from" value="<%= params[:from] %>"
+               class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+        <span class="text-slate-500">→</span>
+        <input type="date" name="to" value="<%= params[:to] %>"
+               class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+        <button type="submit" class="bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-500 transition-colors">Apply</button>
+      </form>
+
+      <%= link_to "→ Manage kudos", kudos_review_path,
+            class: "text-xs text-slate-400 border border-slate-700 px-3 py-1.5 rounded-md hover:text-slate-200 hover:border-slate-500 transition-colors whitespace-nowrap" %>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-6 py-6 space-y-6">
+
+    <%# ── Headline ──────────────────────────────────────────────────────────── %>
+    <div class="flex items-baseline gap-3">
+      <span class="text-4xl font-bold text-indigo-400"><%= @total %></span>
+      <span class="text-slate-400 text-sm">approved kudos · <%= @period_label.downcase %></span>
+    </div>
+
+    <%# ── Top section ──────────────────────────────────────────────────────── %>
+    <div class="grid grid-cols-5 gap-5">
+
+      <%# Left: tabbed leaderboard (3/5 width) %>
+      <div class="col-span-3 bg-slate-900 rounded-xl overflow-hidden">
+        <%# Tabs %>
+        <div class="flex border-b border-slate-800">
+          <button
+            data-action="click->kudos-analytics#showReceivers"
+            data-kudos-analytics-target="receiversTab"
+            class="flex-1 py-3 text-xs font-bold tracking-widest uppercase transition-colors border-b-2 border-indigo-500 text-indigo-400">
+            Receivers
+          </button>
+          <button
+            data-action="click->kudos-analytics#showGivers"
+            data-kudos-analytics-target="giversTab"
+            class="flex-1 py-3 text-xs font-bold tracking-widest uppercase transition-colors border-b-2 border-transparent text-slate-500 hover:text-slate-300">
+            Givers
+          </button>
+        </div>
+
+        <%# List %>
+        <div data-kudos-analytics-target="leaderboardList" class="p-4 space-y-1">
+          <%# Rendered by Stimulus from JSON data %>
+        </div>
+      </div>
+
+      <%# Right: donut + counts (2/5 width) %>
+      <div class="col-span-2 flex flex-col gap-4">
+        <%# Donut %>
+        <div class="bg-slate-900 rounded-xl p-5 flex-1">
+          <div class="text-xs font-bold tracking-widest uppercase text-slate-500 mb-4">By Category</div>
+          <div class="flex items-center gap-4">
+            <div class="relative w-28 h-28 flex-shrink-0">
+              <canvas id="donut-chart" width="112" height="112"></canvas>
+              <div class="absolute inset-0 flex items-center justify-content pointer-events-none">
+                <span class="w-full text-center text-xs font-bold text-slate-400"><%= @total %></span>
+              </div>
+            </div>
+            <div id="donut-legend" class="text-xs space-y-1.5 flex-1 min-w-0"></div>
+          </div>
+        </div>
+
+        <%# Stat cards %>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="bg-slate-900 rounded-xl p-4 text-center">
+            <div class="text-xs font-bold tracking-widest uppercase text-slate-500 mb-1">Receivers</div>
+            <div class="text-3xl font-bold text-emerald-400"><%= @unique_receivers %></div>
+            <div class="text-xs text-slate-600 mt-0.5">unique people</div>
+          </div>
+          <div class="bg-slate-900 rounded-xl p-4 text-center">
+            <div class="text-xs font-bold tracking-widest uppercase text-slate-500 mb-1">Givers</div>
+            <div class="text-3xl font-bold text-amber-400"><%= @unique_givers %></div>
+            <div class="text-xs text-slate-600 mt-0.5">unique people</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%# ── Bottom section ────────────────────────────────────────────────────── %>
+    <div class="grid grid-cols-5 gap-5">
+
+      <%# Weekly trend (3/5) %>
+      <div class="col-span-3 bg-slate-900 rounded-xl p-5">
+        <div class="text-xs font-bold tracking-widest uppercase text-slate-500 mb-4">Daily Trend by Category</div>
+        <canvas id="trend-chart" height="120"></canvas>
+      </div>
+
+      <%# Most backed-up (2/5) %>
+      <div class="col-span-2 bg-slate-900 rounded-xl p-5">
+        <div class="text-xs font-bold tracking-widest uppercase text-slate-500 mb-4">Most Backed Up Kudos</div>
+        <div class="space-y-3">
+          <% border_colors = %w[border-amber-400 border-slate-400 border-amber-700] %>
+          <% @most_backed.each_with_index do |k, i| %>
+            <div class="bg-slate-950 rounded-lg p-3 border-l-2 <%= border_colors[i] %>">
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="font-semibold text-sm <%= i == 0 ? 'text-amber-300' : 'text-slate-300' %>"><%= k[:receiver] %></span>
+                <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-800 <%= i == 0 ? 'text-amber-400' : 'text-slate-400' %>">
+                  <%= k[:reactions] %> reactions
+                </span>
+              </div>
+              <div class="relative group/tip">
+                <p class="text-xs text-slate-500 leading-relaxed italic line-clamp-2">"<%= k[:reason] %>"</p>
+                <div class="pointer-events-none absolute bottom-full left-0 mb-1.5 hidden group-hover/tip:block bg-slate-700 text-slate-200 text-xs rounded-lg px-3 py-2 z-20 w-full shadow-xl leading-relaxed">
+                  "<%= k[:reason] %>"
+                </div>
+              </div>
+              <div class="text-xs text-slate-700 mt-1.5"><%= k[:category] %> · from <%= k[:giver] %></div>
+            </div>
+          <% end %>
+          <% if @most_backed.empty? %>
+            <p class="text-xs text-slate-600 text-center py-4">No kudos yet in this period.</p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <%# ── Detail panel (slide-in) ───────────────────────────────────────────── %>
+  <div
+    data-kudos-analytics-target="detailPanel"
+    class="hidden fixed inset-y-0 right-0 w-80 bg-slate-900 border-l border-slate-800 shadow-2xl z-50 overflow-y-auto">
+    <div class="p-5">
+      <div class="flex items-center justify-between mb-5">
+        <h3 data-kudos-analytics-target="detailName" class="font-bold text-slate-100 text-base"></h3>
+        <button data-action="click->kudos-analytics#closeDetail" class="text-slate-500 hover:text-slate-300 text-xl leading-none">×</button>
+      </div>
+
+      <%# Category breakdown %>
+      <div class="mb-5">
+        <div class="text-xs font-bold tracking-widest uppercase text-slate-600 mb-3">Kudos by Category</div>
+        <div data-kudos-analytics-target="detailByCat" class="space-y-2"></div>
+      </div>
+
+      <%# Sparkline %>
+      <div class="mb-5">
+        <div class="text-xs font-bold tracking-widest uppercase text-slate-600 mb-3">Over Time</div>
+        <canvas data-kudos-analytics-target="sparklineChart" height="60"></canvas>
+      </div>
+
+      <%# Top 3 most backed-up %>
+      <div>
+        <div class="text-xs font-bold tracking-widest uppercase text-slate-600 mb-3">Most Backed Up</div>
+        <div data-kudos-analytics-target="detailTop3" class="space-y-2"></div>
+      </div>
+    </div>
+  </div>
+
+  <%# Backdrop %>
+  <div
+    data-kudos-analytics-target="detailBackdrop"
+    data-action="click->kudos-analytics#closeDetail"
+    class="hidden fixed inset-0 bg-black/40 z-40">
+  </div>
+
+</div>
+
+<script type="module">
+  import { Chart, registerables } from "https://esm.sh/chart.js@4.4.0/es2022/chart.bundle.mjs"
+  Chart.register(...registerables)
+
+  const byCategory  = <%= raw @by_category.to_json %>
+  const weeklyTrend = <%= raw @weekly_trend.to_json %>
+  const catColors   = <%= raw @category_colors.to_json %>
+
+  // ── Donut ─────────────────────────────────────────────────────────────
+  const donutCanvas = document.getElementById("donut-chart")
+  if (donutCanvas && Object.keys(byCategory).length) {
+    const labels = Object.keys(byCategory)
+    const values = Object.values(byCategory)
+    const colors = labels.map(l => catColors[l] || "#94a3b8")
+    const total  = values.reduce((a, b) => a + b, 0) || 1
+
+    new Chart(donutCanvas, {
+      type: "doughnut",
+      data: { labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 2, borderColor: "#0f172a" }] },
+      options: {
+        cutout: "65%",
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed}` } } }
+      }
+    })
+
+    const legend = document.getElementById("donut-legend")
+    if (legend) {
+      legend.innerHTML = labels.map((l, i) => `
+        <div class="flex items-center justify-between gap-2">
+          <span style="display:flex;align-items:center;gap:6px;font-size:11px;color:#94a3b8">
+            <span style="color:${colors[i]}">●</span>${l}
+          </span>
+          <span style="font-size:11px;color:#a5b4fc">${Math.round(values[i] / total * 100)}%</span>
+        </div>`).join("")
+    }
+  }
+
+  // ── Weekly trend ───────────────────────────────────────────────────────
+  const trendCanvas = document.getElementById("trend-chart")
+  if (trendCanvas && weeklyTrend.days?.length) {
+    const datasets = (weeklyTrend.datasets || []).map(ds => ({
+      label: ds.label, data: ds.data, backgroundColor: ds.color,
+      stack: "kudos", borderRadius: 2, borderSkipped: false
+    }))
+
+    new Chart(trendCanvas, {
+      type: "bar",
+      data: { labels: weeklyTrend.days, datasets },
+      options: {
+        plugins: { legend: { labels: { color: "#94a3b8", font: { size: 10 }, boxWidth: 10, padding: 12 } } },
+        scales: {
+          x: { stacked: true, ticks: { color: "#475569", font: { size: 10 } }, grid: { color: "#1e293b" } },
+          y: { stacked: true, ticks: { color: "#475569", font: { size: 10 } }, grid: { color: "#1e293b" } }
+        }
+      }
+    })
+  }
+</script>

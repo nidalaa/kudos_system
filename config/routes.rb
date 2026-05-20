@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
-  root "kudos#index"
+  root "dashboard#index"
+  get    "/dashboard",        to: "dashboard#index",   as: :dashboard
   get    "/kudos-review",     to: "kudos#index",       as: :kudos_review
   delete "/kudos-review/all", to: "kudos#destroy_all", as: :kudos_review_all
 
